@@ -1,26 +1,57 @@
 {
-  "name": "solclaimer-mcp",
+  "name": "@solclaimer/mcp",
   "version": "1.0.0",
   "description": "MCP server for SOL Claimer API - Solana token account analysis and rent recovery",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "bin": {
+    "solclaimer-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "ARCHITECTURE.md",
+    "CLAUDE_INTEGRATION.md",
+    "CHATGPT_INTEGRATION.md"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "tsc && node dist/index.js",
     "watch": "tsc --watch",
     "lint": "eslint src --ext .ts",
-    "format": "prettier --write src"
+    "format": "prettier --write src",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "solana",
     "token",
     "rent",
-    "analysis"
+    "analysis",
+    "blockchain",
+    "claude",
+    "chatgpt",
+    "ai",
+    "llm",
+    "web3"
   ],
-  "author": "",
-  "license": "UNLICENSED",
+  "author": "SOL Claimer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solclaimer/mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/solclaimer/mcp/issues"
+  },
+  "homepage": "https://github.com/solclaimer/mcp#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.0.4",
     "axios": "^1.7.7"

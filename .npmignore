@@ -1,0 +1,43 @@
+# Development files
+src/
+tsconfig.json
+.vscode/
+.github/
+
+# Documentation (kept for npm package)
+# But we'll keep README.md
+
+# Test files
+test/
+tests/
+*.test.ts
+*.spec.ts
+coverage/
+
+# Build artifacts (except dist/)
+*.tsbuildinfo
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+.env
+.env.local
+.env.test
+*.log
+npm-debug.log*
+
+# Integration guides (optional - keep them small for npm)
+START_HERE.md
+SETUP_COMPLETE.md
+PROJECT_COMPLETE.md
+QUICKSTART.md
+INTEGRATION_SUMMARY.md
+test.sh

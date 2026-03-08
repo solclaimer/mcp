@@ -5,7 +5,7 @@
       "command": "node",
       "args": ["${workspaceFolder}/dist/index.js"],
       "env": {
-        "SOLCLAIMER_API_URL": "http://localhost:3000"
+        "SOLCLAIMER_API_URL": "https://solclaimer-api.vercel.app/"
       }
     }
   }

@@ -21,9 +21,17 @@ Claude Desktop is the easiest way to use this MCP server.
 - Node.js 18+ installed
 - SOL Claimer API running locally or accessible via network
 
-### Step 1: Build the MCP Server
+### Step 1: Install the MCP Server
 
-First, ensure the MCP server is built:
+**Option A: Install from npm (Recommended)**
+
+```bash
+npm install -g @solclaimer/mcp
+```
+
+The executable will be at: `$(npm bin -g)/solclaimer-mcp` or you can use `npx @solclaimer/mcp`
+
+**Option B: Build from source**
 
 ```bash
 cd /Users/zouhairet-taousy/dev/solclaimer-mcp
@@ -60,6 +68,24 @@ Find your Claude configuration file:
 
 Open the configuration file in your preferred editor and add the SOL Claimer MCP server:
 
+**If you installed via npm:**
+
+```json
+{
+  "mcpServers": {
+    "solclaimer": {
+      "command": "npx",
+      "args": ["@solclaimer/mcp"],
+      "env": {
+        "SOLCLAIMER_API_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
+```
+
+**If you built from source:**
+
 ```json
 {
   "mcpServers": {
@@ -74,7 +100,7 @@ Open the configuration file in your preferred editor and add the SOL Claimer MCP
 }
 ```
 
-**Important:** Update the path `/Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js` to match your actual installation path.
+**Important:** If using source, update the path to match your actual installation path.
 
 ### Step 4: Ensure SOL Claimer API is Running
 

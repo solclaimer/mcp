@@ -1,5 +1,10 @@
 # SOL Claimer MCP Server
 
+[![npm version](https://badge.fury.io/js/@solclaimer%2Fmcp.svg)](https://www.npmjs.com/package/@solclaimer/mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/node/v/@solclaimer/mcp)](https://nodejs.org)
+[![CI](https://github.com/solclaimer/mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/solclaimer/mcp/actions/workflows/ci.yml)
+
 A Model Context Protocol (MCP) server that provides seamless integration between LLM applications (ChatGPT, Claude, etc.) and the SOL Claimer API. This server enables AI assistants to analyze Solana token accounts and help users recover rent from empty and low-value token accounts.
 
 ## Features
@@ -22,7 +27,23 @@ A Model Context Protocol (MCP) server that provides seamless integration between
 
 ## Installation
 
+### Option 1: Install from npm (Recommended)
+
 ```bash
+# Install globally
+npm install -g @solclaimer/mcp
+
+# Or install locally in your project
+npm install @solclaimer/mcp
+```
+
+### Option 2: Install from source
+
+```bash
+# Clone the repository
+git clone https://github.com/solclaimer/mcp.git
+cd mcp
+
 # Install dependencies
 npm install
 

@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test --if-present
+
+      - name: Bump version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger with version choice
+            VERSION_TYPE="${{ github.event.inputs.version }}"
+          else
+            # Automatic: check commit message for version bump type
+            COMMIT_MSG=$(git log -1 --pretty=%B)
+            if [[ "$COMMIT_MSG" =~ \[major\] ]]; then
+              VERSION_TYPE="major"
+            elif [[ "$COMMIT_MSG" =~ \[minor\] ]]; then
+              VERSION_TYPE="minor"
+            else
+              VERSION_TYPE="patch"
+            fi
+          fi
+          
+          echo "Bumping $VERSION_TYPE version..."
+          npm version $VERSION_TYPE -m "chore: bump version to %s [skip ci]"
+          
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Push changes
+        run: |
+          git push origin main
+          git push origin v${{ steps.version.outputs.new_version }}
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          release_name: Release v${{ steps.version.outputs.new_version }}
+          body: |
+            ## Changes in v${{ steps.version.outputs.new_version }}
+            
+            See [CHANGELOG.md](CHANGELOG.md) for details.
+            
+            ### Installation
+            ```bash
+            npm install @solclaimer/mcp@${{ steps.version.outputs.new_version }}
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Notify success
+        run: |
+          echo "✅ Successfully published v${{ steps.version.outputs.new_version }} to npm"
