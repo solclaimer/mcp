@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "solclaimer": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/dist/index.js"],
+      "env": {
+        "SOLCLAIMER_API_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
