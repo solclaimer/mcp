@@ -77,7 +77,7 @@ Open the configuration file in your preferred editor and add the SOL Claimer MCP
       "command": "npx",
       "args": ["@solclaimer/mcp"],
       "env": {
-        "SOLCLAIMER_API_URL": "http://localhost:3000"
+             "SOLCLAIMER_API_URL": "https://solclaimer-api.vercel.app/"
       }
     }
   }
@@ -330,6 +330,16 @@ Claude will call `get_how_it_works` and explain the features.
 - Ensure Node.js version is 18+: `node --version`
 - Rebuild the project: `npm run build`
 - Delete node_modules and reinstall: `rm -rf node_modules && npm install`
+
+### Issue: `import: command not found` when using `npx @solclaimer/mcp`
+
+This happens when an older package version is missing a Node shebang in the CLI entrypoint.
+
+**Workarounds:**
+1. Use the source build directly in Claude config:
+  - `"command": "node"`
+  - `"args": ["/Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js"]`
+2. Upgrade to the latest published package version once available.
 
 ---
 

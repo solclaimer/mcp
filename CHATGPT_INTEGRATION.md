@@ -164,11 +164,13 @@ paths:
 
 ### Step 3: Create a GPT in ChatGPT
 
-1. Go to [ChatGPT Plus](https://chat.openai.com)
-2. Click "Create a GPT"
-3. Name: "SOL Claimer Analyzer"
-4. Description: "Analyzes Solana wallets to identify empty token accounts and low-value tokens that can be closed to recover rent"
-5. Instructions:
+1. Go to [ChatGPT](https://chatgpt.com) (requires ChatGPT Plus or Team)
+2. Click **"Explore"** in the sidebar, then click **"Create"** (or go directly to [chatgpt.com/create](https://chatgpt.com/create))
+3. In the GPT Builder, switch to the **"Configure"** tab
+4. Fill in the details:
+  - **Name:** "SOL Claimer Analyzer"
+  - **Description:** "Analyzes Solana wallets to identify empty token accounts and low-value tokens that can be closed to recover rent"
+5. Add **Instructions:**
    ```
    You are a helpful assistant for the SOL Claimer tool. Help users analyze their Solana wallets to:
    1. Identify empty token accounts that can be closed to recover rent
@@ -177,14 +179,21 @@ paths:
    
    When users provide a wallet address, use the available tools to analyze it and provide clear recommendations.
    ```
-6. Under "Actions", click "Create New Action"
-7. Paste the OpenAPI schema from above
-8. Set authentication to "None" (or configure API key if needed)
+6. Scroll down to **"Actions"** section in the Configure tab
+7. Click **"Create new action"**
+8. In the Schema field, paste the OpenAPI schema from Step 2 above (update the server URL if needed)
+9. Set **Authentication** to "None" (or configure API key if your API requires it)
+10. Click **"Save"** to save your action
 
 ### Step 4: Share Your GPT
 
-1. Click "Save" then "Share GPT"
-2. Share the link with others to use your SOL Claimer analyzer
+1. Click **"Create"** or **"Update"** in the top right
+2. Choose your sharing option:
+  - **"Only me"** - Private, for your use only
+  - **"Anyone with a link"** - Share a link with specific people
+  - **"Public"** - List in the GPT Store for anyone to find
+3. Click **"Confirm"** to publish
+4. Copy the link to share with others who want to use your SOL Claimer analyzer
 
 ---
 
