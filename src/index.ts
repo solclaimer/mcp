@@ -1,9 +1,5 @@
-import {
-  Server,
-} from "@modelcontextprotocol/sdk/server/index.js";
-import {
-  StdioServerTransport,
-} from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -111,15 +107,11 @@ class SolClaimerApiClient {
 
   async getHowItWorks(): Promise<HowItWorksResponse> {
     try {
-      const response = await this.apiClient.get<HowItWorksResponse>(
-        "/api/v1/info/how-it-works"
-      );
+      const response = await this.apiClient.get<HowItWorksResponse>("/api/v1/info/how-it-works");
       return response.data;
     } catch (error) {
       throw new Error(
-        `Failed to get how it works: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
+        `Failed to get how it works: ${error instanceof Error ? error.message : "Unknown error"}`
       );
     }
   }
