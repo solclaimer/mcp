@@ -21,7 +21,9 @@
     "dev": "tsc && node dist/index.js",
     "watch": "tsc --watch",
     "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write src",
+    "format:check": "prettier --check src",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -58,9 +60,10 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
-    "typescript": "^5.7.2",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0",
-    "eslint": "^8.56.0"
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.7.2"
   }
 }
