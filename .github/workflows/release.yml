@@ -57,6 +57,10 @@ jobs:
       - name: Bump version
         id: version
         run: |
+          set -euo pipefail
+
+          git fetch --tags --force
+
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             # Manual trigger with version choice
             VERSION_TYPE="${{ github.event.inputs.version }}"
@@ -72,8 +76,46 @@ jobs:
             fi
           fi
 
+          bump_version() {
+            local version="$1"
+            local bump_type="$2"
+            IFS='.' read -r major minor patch <<< "$version"
+
+            case "$bump_type" in
+              major)
+                major=$((major + 1))
+                minor=0
+                patch=0
+                ;;
+              minor)
+                minor=$((minor + 1))
+                patch=0
+                ;;
+              patch)
+                patch=$((patch + 1))
+                ;;
+              *)
+                echo "Unsupported version type: $bump_type"
+                exit 1
+                ;;
+            esac
+
+            echo "${major}.${minor}.${patch}"
+          }
+
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          TARGET_VERSION=$(bump_version "$CURRENT_VERSION" "$VERSION_TYPE")
+
+          while git rev-parse -q --verify "refs/tags/v${TARGET_VERSION}" >/dev/null; do
+            echo "Tag v${TARGET_VERSION} already exists, bumping patch version..."
+            TARGET_VERSION=$(bump_version "$TARGET_VERSION" "patch")
+          done
+
           echo "Bumping $VERSION_TYPE version..."
-          npm version $VERSION_TYPE -m "chore: bump version to %s [skip ci]"
+          npm version "$TARGET_VERSION" --no-git-tag-version
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to ${TARGET_VERSION} [skip ci]"
+          git tag -a "v${TARGET_VERSION}" -m "chore: bump version to ${TARGET_VERSION} [skip ci]"
 
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
