@@ -24,21 +24,32 @@ interface AccountDetail {
   mint: string;
   amount: string;
   decimals: number;
-  uiAmount: number;
+  uiAmount: number | null;
   lamports: number;
   state: string;
   closeAuthority: string | null;
   usdValue: number;
-  tokenName: string;
-  tokenSymbol: string;
-  tokenLogo: string;
-  isVerifiedContract: boolean;
+  tokenName?: string;
+  tokenSymbol?: string;
+  tokenLogo?: string;
+  isVerifiedContract?: boolean;
 }
 
 interface BurnableAccountsAnalysis {
   success: boolean;
   data: {
     accountsToBurn: number;
+    totalSol: number;
+    totalUsdValue: number;
+    accountDetails: AccountDetail[];
+  };
+  timestamp: string;
+}
+
+interface SwappableAccountsAnalysis {
+  success: boolean;
+  data: {
+    accountsToSwap: number;
     totalSol: number;
     totalUsdValue: number;
     accountDetails: AccountDetail[];
@@ -101,6 +112,22 @@ class SolClaimerApiClient {
     } catch (error) {
       throw new Error(
         `Failed to analyze burnable accounts: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    }
+  }
+
+  async analyzeSwappableAccounts(walletAddress: string): Promise<SwappableAccountsAnalysis> {
+    try {
+      const response = await this.apiClient.post<SwappableAccountsAnalysis>(
+        "/api/v1/accounts/analyze-swappable",
+        { walletAddress }
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        `Failed to analyze swappable accounts: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
@@ -181,6 +208,22 @@ const tools: Tool[] = [
       required: [],
     },
   },
+  {
+    name: "analyze_swappable_accounts",
+    description:
+      "Analyze a Solana wallet for token accounts with amount > 0 that can be swapped and then closed. " +
+      "Returns detailed token information for each swappable account.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {
+        wallet_address: {
+          type: "string",
+          description: "The Solana wallet address to analyze",
+        },
+      },
+      required: ["wallet_address"],
+    },
+  },
 ];
 
 // Tool call handlers
@@ -228,6 +271,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           },
         ],
       };
+    } else if (name === "analyze_swappable_accounts") {
+      const walletAddress = (args as Record<string, string>).wallet_address;
+      if (!walletAddress) {
+        throw new Error("wallet_address is required");
+      }
+
+      const result = await apiClient.analyzeSwappableAccounts(walletAddress);
+      return {
+        content: [
+          {
+            type: "text",
+            text: formatSwappableAccountsResponse(result),
+          },
+        ],
+      };
     } else {
       throw new Error(`Unknown tool: ${name}`);
     }
@@ -258,7 +316,15 @@ Accounts to Close: ${data.data.accountsToClose}
 Total SOL to Recover: ${data.data.totalSol} SOL
 
 This wallet has ${data.data.accountsToClose} empty token accounts that can be closed to recover ${data.data.totalSol} SOL in rent fees.
+
+Claim link: https://solclaimer.app
 `;
+}
+
+function formatTokenLabel(account: AccountDetail): string {
+  const tokenName = account.tokenName?.trim() || "Unknown Token";
+  const tokenSymbol = account.tokenSymbol?.trim() || "N/A";
+  return `${tokenName} (${tokenSymbol})`;
 }
 
 function formatBurnableAccountsResponse(data: BurnableAccountsAnalysis): string {
@@ -278,7 +344,7 @@ Accounts Details:
 
   data.data.accountDetails.forEach((account, index) => {
     response += `
-${index + 1}. ${account.tokenName} (${account.tokenSymbol})
+${index + 1}. ${formatTokenLabel(account)}
    Mint: ${account.mint}
    Amount: ${account.uiAmount} (${account.amount} smallest units)
    USD Value: $${account.usdValue.toFixed(2)}
@@ -286,6 +352,43 @@ ${index + 1}. ${account.tokenName} (${account.tokenSymbol})
    Verified Contract: ${account.isVerifiedContract ? "Yes" : "No"}
 `;
   });
+
+  response += `
+Burn link: https://solclaimer.app
+`;
+
+  return response;
+}
+
+function formatSwappableAccountsResponse(data: SwappableAccountsAnalysis): string {
+  if (!data.success) {
+    return "Failed to analyze swappable accounts";
+  }
+
+  let response = `
+Swappable Token Accounts Analysis
+=================================
+Total Accounts to Swap: ${data.data.accountsToSwap}
+Total SOL to Recover (after swap and close): ${data.data.totalSol} SOL
+Total USD Value: $${data.data.totalUsdValue.toFixed(2)}
+
+Accounts Details:
+`;
+
+  data.data.accountDetails.forEach((account, index) => {
+    response += `
+${index + 1}. ${formatTokenLabel(account)}
+   Mint: ${account.mint}
+   Amount: ${account.uiAmount} (${account.amount} smallest units)
+   USD Value: $${account.usdValue.toFixed(2)}
+   Lamports (rent): ${account.lamports}
+   Verified Contract: ${account.isVerifiedContract ? "Yes" : "No"}
+`;
+  });
+
+  response += `
+Swap link: https://solclaimer.app
+`;
 
   return response;
 }
