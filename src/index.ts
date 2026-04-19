@@ -138,7 +138,8 @@ class SolClaimerApiClient {
         typeof error.response?.data === "object" &&
         error.response?.data !== null &&
         "error" in error.response.data &&
-        typeof (error.response.data as { error?: { message?: unknown } }).error?.message === "string"
+        typeof (error.response.data as { error?: { message?: unknown } }).error?.message ===
+          "string"
           ? (error.response.data as { error: { message: string } }).error.message
           : null;
 
