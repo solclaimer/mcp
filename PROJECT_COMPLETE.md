@@ -14,7 +14,7 @@ A **production-ready TypeScript MCP server** that connects Large Language Models
 |-----------|--------|---------|
 | **MCP Server** | ✅ Built | 330 lines of TypeScript, fully typed |
 | **API Client** | ✅ Implemented | Wraps SOL Claimer REST API |
-| **Tools** | ✅ Defined (3) | analyze_empty_accounts, analyze_burnable_accounts, get_how_it_works |
+| **Tools** | ✅ Defined (4) | analyze_empty_accounts, analyze_burnable_accounts, analyze_swappable_accounts, get_how_it_works |
 | **Type Safety** | ✅ Strict | No implicit `any`, proper error handling |
 | **Compilation** | ✅ Complete | TypeScript → JavaScript (dist/index.js) |
 | **Dependencies** | ✅ Installed | 172 packages (@modelcontextprotocol/sdk 1.0.4, axios, etc.) |
@@ -67,7 +67,7 @@ solclaimer-mcp/
 ```bash
 cd /path/to/solclaimer-api
 npm run start:dev
-# API will be at http://localhost:3000
+# API will be at https://api.solclaimer.app
 ```
 
 ### Step 3: Follow Your Chosen Integration Guide
@@ -80,7 +80,7 @@ Each guide includes:
 
 ---
 
-## 🛠 The Three Tools
+## 🛠 The Four Tools
 
 All requests go through the MCP server, which calls the SOL Claimer API.
 
@@ -112,7 +112,22 @@ All requests go through the MCP server, which calls the SOL Claimer API.
 }
 ```
 
-### Tool 3: `get_how_it_works`
+### Tool 3: `analyze_swappable_accounts`
+```json
+{
+  "name": "analyze_swappable_accounts",
+  "description": "Find tokens with amount > 0 that can be swapped and closed",
+  "input": "wallet_address (string)",
+  "output": {
+    "accountsToSwap": 7,
+    "totalSol": 0.0142749,
+    "totalUsdValue": 1.254321,
+    "accountDetails": [...]
+  }
+}
+```
+
+### Tool 4: `get_how_it_works`
 ```json
 {
   "name": "get_how_it_works",
@@ -160,7 +175,7 @@ All requests go through the MCP server, which calls the SOL Claimer API.
       "command": "node",
       "args": ["/Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js"],
       "env": {
-        "SOLCLAIMER_API_URL": "http://localhost:3000"
+        "SOLCLAIMER_API_URL": "https://api.solclaimer.app"
       }
     }
   }
@@ -194,13 +209,13 @@ User in Claude/ChatGPT
     ↓
 Claude/ChatGPT recognizes it needs a tool
     ↓
-Calls analyze_empty_accounts or analyze_burnable_accounts
+Calls analyze_empty_accounts, analyze_burnable_accounts, or analyze_swappable_accounts
     ↓
 Request goes to MCP Server (via stdio)
     ↓
 MCP Server calls SolClaimerApiClient
     ↓
-HTTP request to http://localhost:3000/api/v1/accounts/analyze-*
+HTTP request to https://api.solclaimer.app/api/v1/accounts/analyze-*
     ↓
 SOL Claimer API analyzes blockchain
     ↓
@@ -222,7 +237,7 @@ User sees: "Found 5 empty accounts, can recover 0.01 SOL"
 ### Source Code
 - **src/index.ts** (330 lines)
   - `SolClaimerApiClient` - HTTP client for SOL Claimer API
-  - Tool definitions - 3 tools with full schemas
+  - Tool definitions - 4 tools with full schemas
   - Request handlers - Process tool calls from LLMs
   - Response formatters - Human-readable output
   - Error handling - Graceful error management
@@ -313,7 +328,7 @@ User sees: "Found 5 empty accounts, can recover 0.01 SOL"
 You: "What's in my Solana wallet: 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri?"
 
 Claude: "I'll analyze that for you.
-[Uses analyze_empty_accounts and analyze_burnable_accounts]
+[Uses analyze_empty_accounts, analyze_burnable_accounts, and analyze_swappable_accounts]
 
 I found:
 - 5 empty accounts containing 0.0101964 SOL
@@ -327,7 +342,7 @@ I recommend closing the empty accounts first..."
 ```
 You: "Analyze wallet 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri"
 
-GPT: "Analyzing... Found 5 empty accounts and 12 burnable tokens.
+GPT: "Analyzing... Found 5 empty accounts, 12 burnable tokens, and 4 swappable balances.
 Would you like help with anything else?"
 ```
 
@@ -350,7 +365,7 @@ Would you like help with anything else?"
 **If something isn't working:**
 
 1. Check the troubleshooting section in your integration guide
-2. Verify SOL Claimer API is running: `curl http://localhost:3000/api/v1/info/how-it-works`
+2. Verify SOL Claimer API is running: `curl https://api.solclaimer.app/api/v1/info/how-it-works`
 3. Check the wallet address format (44 chars, base58)
 4. Read [SETUP_COMPLETE.md](./SETUP_COMPLETE.md#troubleshooting-quick-links) for quick fixes
 

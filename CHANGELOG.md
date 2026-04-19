@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial release of SOL Claimer MCP server
-- Three tools for analyzing Solana wallets:
+- Four tools for analyzing Solana wallets:
   - `analyze_empty_accounts` - Find empty token accounts to close
   - `analyze_burnable_accounts` - Find low-value tokens (<$1) to burn
   - `get_how_it_works` - Learn about SOL Claimer features
@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for multiple Node.js versions (18.x, 20.x, 22.x)
 
 ### Features
-- Connects to SOL Claimer REST API (http://localhost:3000)
+- Connects to SOL Claimer REST API (https://api.solclaimer.app)
 - Type-safe API client with proper error handling
 - Human-readable response formatting
 - 30-second request timeout

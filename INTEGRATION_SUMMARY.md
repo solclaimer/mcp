@@ -4,7 +4,7 @@ You now have a fully functional MCP (Model Context Protocol) server that integra
 
 ## What You Got
 
-✅ **Complete MCP Server** - TypeScript-based server with 3 powerful tools
+✅ **Complete MCP Server** - TypeScript-based server with 4 powerful tools
 ✅ **Build System** - Compiled and ready to run
 ✅ **Claude Integration** - Works seamlessly with Claude Desktop
 ✅ **ChatGPT Integration** - Support for ChatGPT custom GPTs and API
@@ -29,7 +29,7 @@ solclaimer-mcp/
 └── .vscode/mcp.json             # VS Code MCP configuration
 ```
 
-## The Three Tools
+## The Four Tools
 
 ### 1. analyze_empty_accounts
 - **Input**: Solana wallet address
@@ -41,7 +41,12 @@ solclaimer-mcp/
 - **Output**: Detailed list of low-value tokens (<$1), total SOL + USD recoverable
 - **Use case**: Identify tokens to burn and close accounts
 
-### 3. get_how_it_works
+### 3. analyze_swappable_accounts
+- **Input**: Solana wallet address
+- **Output**: Token accounts with amount > 0 that can be swapped and closed
+- **Use case**: Identify balances to swap, then close to recover rent
+
+### 4. get_how_it_works
 - **Input**: None
 - **Output**: Information about SOL Claimer features
 - **Use case**: Learn what SOL Claimer does
@@ -71,7 +76,7 @@ Claude: [Calls analyze_empty_accounts] Found 5 empty accounts...
 
 **Time:** 10 minutes | **Complexity:** Medium | **Prerequisites:** ChatGPT Plus
 
-1. Expose the API (localhost or remote)
+1. Expose the API (api.solclaimer.app)
 2. Use the OpenAPI schema from CHATGPT_INTEGRATION.md
 3. Create a custom GPT at https://chat.openai.com
 4. Add the schema as an action
@@ -109,7 +114,7 @@ Any tool that supports MCP (Cline, Cursor, etc.) can use this server:
       "command": "node",
       "args": ["/path/to/dist/index.js"],
       "env": {
-        "SOLCLAIMER_API_URL": "http://localhost:3000"
+        "SOLCLAIMER_API_URL": "https://api.solclaimer.app"
       }
     }
   }
@@ -147,7 +152,7 @@ Ensure the SOL Claimer API is running:
 ```bash
 cd /path/to/solclaimer-api
 npm run start:dev
-# Should be at http://localhost:3000
+# Should be at https://api.solclaimer.app
 ```
 
 ### Optional: Custom API URL
@@ -163,7 +168,7 @@ export SOLCLAIMER_API_URL=https://your-api-domain.com
 
 ```bash
 # Verify API is responding
-curl http://localhost:3000/api/v1/info/how-it-works
+curl https://api.solclaimer.app/api/v1/info/how-it-works
 ```
 
 ### Test 2: Claude Desktop
@@ -195,7 +200,7 @@ gpt4.tools.call("analyze_empty_accounts",
 → Check [CLAUDE_INTEGRATION.md](./CLAUDE_INTEGRATION.md#troubleshooting)
 
 ### "API connection refused"
-→ Ensure SOL Claimer API is running on port 3000
+→ Ensure SOL Claimer API is reachable at https://api.solclaimer.app
 
 ### "Invalid wallet address"
 → Wallet must be 44 chars, base58: `7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri`
@@ -220,7 +225,7 @@ Solana Blockchain + Moralis
 
 The MCP server:
 - Listens on stdio (standard input/output)
-- Exposes 3 tools to the LLM
+- Exposes 4 tools to the LLM
 - Calls the SOL Claimer REST API
 - Formats responses for the LLM
 
@@ -281,6 +286,7 @@ You: Check my SOL Claimer analysis for wallet 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZm
 GPT: I found:
 - 5 empty accounts (0.010 SOL)
 - 12 burnable tokens (0.024 SOL)
+- 4 swappable token balances
 
 Would you like help with next steps?
 ```

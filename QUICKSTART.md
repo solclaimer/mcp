@@ -27,7 +27,7 @@ export MORALIS_API_KEY=your_key_here
 npm run start:dev
 ```
 
-The API should be running at `http://localhost:3000`
+The API should be running at `https://api.solclaimer.app`
 
 ## 4. Choose Your Integration
 
@@ -43,7 +43,7 @@ The API should be running at `http://localhost:3000`
       "command": "node",
       "args": ["/Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js"],
       "env": {
-        "SOLCLAIMER_API_URL": "http://localhost:3000"
+        "SOLCLAIMER_API_URL": "https://api.solclaimer.app"
       }
     }
   }
@@ -65,7 +65,7 @@ The API should be running at `http://localhost:3000`
 ### Method 1: Direct API Call
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/accounts/analyze-empty \
+curl -X POST https://api.solclaimer.app/api/v1/accounts/analyze-empty \
   -H "Content-Type: application/json" \
   -d '{"walletAddress":"7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri"}'
 ```
@@ -76,6 +76,7 @@ Ask Claude:
 - "What tools do you have available?"
 - "Analyze empty accounts for wallet 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri"
 - "Check for burnable tokens in wallet 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri"
+- "Check for swappable tokens in wallet 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri"
 
 ## Available Tools
 
@@ -83,6 +84,7 @@ Ask Claude:
 |------|-------------|-------|
 | `analyze_empty_accounts` | Find empty accounts to close | Wallet address |
 | `analyze_burnable_accounts` | Find low-value tokens (<$1) | Wallet address |
+| `analyze_swappable_accounts` | Find tokens with amount > 0 to swap and close | Wallet address |
 | `get_how_it_works` | Learn about SOL Claimer | None |
 
 ## Example Wallets
@@ -93,8 +95,8 @@ Use these for testing:
 ## Environment Variables
 
 ```bash
-# Optional - defaults to http://localhost:3000
-export SOLCLAIMER_API_URL=http://localhost:3000
+# Optional - defaults to https://api.solclaimer.app
+export SOLCLAIMER_API_URL=https://api.solclaimer.app
 ```
 
 ## Troubleshooting
@@ -107,7 +109,7 @@ export SOLCLAIMER_API_URL=http://localhost:3000
 
 **API connection error?**
 - Ensure SOL Claimer API is running
-- Check: `curl http://localhost:3000/api/v1/info/how-it-works`
+- Check: `curl https://api.solclaimer.app/api/v1/info/how-it-works`
 - Verify `SOLCLAIMER_API_URL` environment variable
 
 **Invalid wallet address?**

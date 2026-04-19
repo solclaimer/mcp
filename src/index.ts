@@ -76,7 +76,7 @@ interface HowItWorksResponse {
 class SolClaimerApiClient {
   private apiClient: AxiosInstance;
 
-  constructor(baseUrl: string = "http://localhost:3000") {
+  constructor(baseUrl: string = "https://api.solclaimer.app") {
     this.apiClient = axios.create({
       baseURL: baseUrl,
       timeout: 30000,
@@ -169,7 +169,7 @@ const server = new Server(
 );
 
 const apiClient = new SolClaimerApiClient(
-  process.env.SOLCLAIMER_API_URL || "http://localhost:3000"
+  process.env.SOLCLAIMER_API_URL || "https://api.solclaimer.app"
 );
 
 // Define tools

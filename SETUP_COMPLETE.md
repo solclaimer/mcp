@@ -23,12 +23,13 @@ Your MCP server is ready to use with Claude and ChatGPT.
     └── .vscode/mcp.json - MCP server configuration
 ```
 
-## Three Powerful Tools
+## Four Powerful Tools
 
 | Tool | Purpose | Time |
 |------|---------|------|
 | `analyze_empty_accounts` | Find accounts to close for rent recovery | 2-5s |
 | `analyze_burnable_accounts` | Find low-value tokens (<$1) to burn | 3-8s |
+| `analyze_swappable_accounts` | Find amount > 0 tokens to swap and close | 3-8s |
 | `get_how_it_works` | Learn about SOL Claimer | instant |
 
 ## Getting Started (Pick One)
@@ -48,7 +49,7 @@ Your MCP server is ready to use with Claude and ChatGPT.
       "command": "node",
       "args": ["/Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js"],
       "env": {
-        "SOLCLAIMER_API_URL": "http://localhost:3000"
+        "SOLCLAIMER_API_URL": "https://api.solclaimer.app"
       }
     }
   }
@@ -65,7 +66,7 @@ Your MCP server is ready to use with Claude and ChatGPT.
 ### 🥈 Option 2: ChatGPT Custom GPT
 
 ```bash
-# 1. Ensure API accessible (localhost or ngrok)
+# 1. Ensure API accessible (api.solclaimer.app)
 
 # 2. Create custom GPT at https://chat.openai.com
 
@@ -167,11 +168,11 @@ Ask a question about a wallet
          ↓
 Claude/ChatGPT recognizes it needs to analyze
          ↓
-Calls "analyze_empty_accounts" tool
+Calls "analyze_empty_accounts", "analyze_burnable_accounts", or "analyze_swappable_accounts" tool
          ↓
 MCP Server receives request (via stdio)
          ↓
-SolClaimerApiClient calls REST API (localhost:3000)
+SolClaimerApiClient calls REST API (api.solclaimer.app)
          ↓
 API analyzes Solana blockchain
          ↓
@@ -269,7 +270,7 @@ INTEGRATION_SUMMARY.md (You are here)
 You: "What's in my Solana wallet?"
 Claude: "I'll analyze that for you. What's your wallet address?"
 You: "7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri"
-Claude: [Calls analyze_empty_accounts and analyze_burnable_accounts]
+Claude: [Calls analyze_empty_accounts, analyze_burnable_accounts, and analyze_swappable_accounts]
 "Found:
 - 5 empty accounts (0.01 SOL)
 - 12 low-value tokens (0.02 SOL)
@@ -279,7 +280,7 @@ Total recovery: ~0.03 SOL"
 ### ChatGPT Custom GPT
 ```
 You: "Analyze my Solana wallet 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri"
-GPT: "I found 5 empty accounts and 12 burnable tokens..."
+GPT: "I found 5 empty accounts, 12 burnable tokens, and 4 swappable balances..."
 You: "How do I close them?"
 GPT: "Here are the steps..."
 ```

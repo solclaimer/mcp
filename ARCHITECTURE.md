@@ -4,7 +4,7 @@ This document describes the high-level architecture and design decisions for the
 
 ### Overview
 
-The SOL Claimer MCP server acts as a bridge between Large Language Models (LLMs) like Claude and ChatGPT, and the SOL Claimer API. It exposes three tools that enable AI assistants to help users analyze Solana token accounts and recover rent.
+The SOL Claimer MCP server acts as a bridge between Large Language Models (LLMs) like Claude and ChatGPT, and the SOL Claimer API. It exposes four tools that enable AI assistants to help users analyze Solana token accounts and recover rent.
 
 ### Components
 
@@ -12,7 +12,7 @@ The SOL Claimer MCP server acts as a bridge between Large Language Models (LLMs)
 
 The main server implementation built on the official MCP TypeScript SDK. Responsible for:
 
-- **Tool Registration**: Defines three tools with schemas
+- **Tool Registration**: Defines four tools with schemas
 - **Request Handling**: Routes LLM tool calls to appropriate handlers
 - **API Communication**: Interfaces with the SOL Claimer API
 - **Response Formatting**: Converts structured API responses into readable text
@@ -137,7 +137,7 @@ The server reads configuration from environment variables:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `SOLCLAIMER_API_URL` | `http://localhost:3000` | SOL Claimer API base URL |
+| `SOLCLAIMER_API_URL` | `https://api.solclaimer.app` | SOL Claimer API base URL |
 
 ### Deployment Options
 

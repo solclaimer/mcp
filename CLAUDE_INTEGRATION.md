@@ -19,7 +19,7 @@ Claude Desktop is the easiest way to use this MCP server.
 
 - Claude Desktop application installed ([download here](https://claude.ai/download))
 - Node.js 18+ installed
-- SOL Claimer API running locally or accessible via network
+- SOL Claimer API accessible at `https://api.solclaimer.app`
 
 ### Step 1: Install the MCP Server
 
@@ -77,7 +77,7 @@ Open the configuration file in your preferred editor and add the SOL Claimer MCP
       "command": "npx",
       "args": ["@solclaimer/mcp"],
       "env": {
-             "SOLCLAIMER_API_URL": "https://solclaimer-api.vercel.app/"
+        "SOLCLAIMER_API_URL": "https://api.solclaimer.app"
       }
     }
   }
@@ -93,7 +93,7 @@ Open the configuration file in your preferred editor and add the SOL Claimer MCP
       "command": "node",
       "args": ["/Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js"],
       "env": {
-        "SOLCLAIMER_API_URL": "http://localhost:3000"
+        "SOLCLAIMER_API_URL": "https://api.solclaimer.app"
       }
     }
   }
@@ -111,7 +111,7 @@ cd /path/to/solclaimer-api
 npm run start:dev
 ```
 
-The API should be accessible at `http://localhost:3000`.
+The API should be accessible at `https://api.solclaimer.app`.
 
 ### Step 5: Restart Claude Desktop
 
@@ -120,7 +120,7 @@ Completely close Claude Desktop (not just minimize) and reopen it. The MCP serve
 ### Step 6: Verify Integration
 
 In Claude Desktop, you should now see:
-- Three new tools available: `analyze_empty_accounts`, `analyze_burnable_accounts`, and `get_how_it_works`
+- Four tools available: `analyze_empty_accounts`, `analyze_burnable_accounts`, `analyze_swappable_accounts`, and `get_how_it_works`
 - These will appear in the tools panel when appropriate
 
 Try asking Claude:
@@ -150,7 +150,7 @@ const serverPath = "/Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js";
 const serverProcess = spawn("node", [serverPath], {
   env: {
     ...process.env,
-    SOLCLAIMER_API_URL: "http://localhost:3000",
+    SOLCLAIMER_API_URL: "https://api.solclaimer.app",
   },
 });
 
@@ -191,6 +191,21 @@ async function analyzeWallet(walletAddress: string) {
         },
       },
       {
+        name: "analyze_swappable_accounts",
+        description:
+          "Analyze a Solana wallet for token accounts with amount > 0 that can be swapped and closed.",
+        input_schema: {
+          type: "object",
+          properties: {
+            wallet_address: {
+              type: "string",
+              description: "The Solana wallet address to analyze",
+            },
+          },
+          required: ["wallet_address"],
+        },
+      },
+      {
         name: "get_how_it_works",
         description: "Get information about SOL Claimer features.",
         input_schema: {
@@ -203,7 +218,7 @@ async function analyzeWallet(walletAddress: string) {
     messages: [
       {
         role: "user",
-        content: `Please analyze the Solana wallet ${walletAddress} and tell me what accounts can be closed and what tokens can be burned.`,
+        content: `Please analyze the Solana wallet ${walletAddress} and tell me what accounts can be closed, burned, or swapped.`,
       },
     ],
   });
@@ -225,7 +240,7 @@ If you prefer direct HTTP requests to the API:
 async function analyzeWalletDirect(walletAddress: string) {
   // Empty accounts
   const emptyResponse = await fetch(
-    "http://localhost:3000/api/v1/accounts/analyze-empty",
+    "https://api.solclaimer.app/api/v1/accounts/analyze-empty",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -235,7 +250,16 @@ async function analyzeWalletDirect(walletAddress: string) {
 
   // Burnable accounts
   const burnableResponse = await fetch(
-    "http://localhost:3000/api/v1/accounts/analyze-burnable",
+    "https://api.solclaimer.app/api/v1/accounts/analyze-burnable",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ walletAddress }),
+    }
+  );
+
+  const swappableResponse = await fetch(
+    "https://api.solclaimer.app/api/v1/accounts/analyze-swappable",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -245,8 +269,9 @@ async function analyzeWalletDirect(walletAddress: string) {
 
   const empty = await emptyResponse.json();
   const burnable = await burnableResponse.json();
+  const swappable = await swappableResponse.json();
 
-  return { empty, burnable };
+  return { empty, burnable, swappable };
 }
 ```
 
@@ -261,7 +286,7 @@ Ask Claude:
 What tools do you have available?
 ```
 
-Claude should list the three SOL Claimer tools.
+Claude should list the four SOL Claimer tools.
 
 ### Test 2: Analyze Empty Accounts
 
@@ -281,7 +306,16 @@ Check for low-value tokens in wallet 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyr
 
 Expected response: Claude calls `analyze_burnable_accounts` and provides detailed account information.
 
-### Test 4: How It Works
+### Test 4: Analyze Swappable Accounts
+
+Ask Claude:
+```
+Check for swappable tokens in wallet 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri
+```
+
+Expected response: Claude calls `analyze_swappable_accounts` and provides token details with swap-ready balances.
+
+### Test 5: How It Works
 
 Ask Claude:
 ```
@@ -307,9 +341,9 @@ Claude will call `get_how_it_works` and explain the features.
 ### Issue: "Connection refused" error
 
 **Solution:**
-1. Ensure SOL Claimer API is running: `curl http://localhost:3000/api/v1/info/how-it-works`
+1. Ensure SOL Claimer API is reachable: `curl https://api.solclaimer.app/api/v1/info/how-it-works`
 2. If running on different host/port, update `SOLCLAIMER_API_URL` in the config
-3. Check firewall settings allow port 3000
+3. Check network egress to `api.solclaimer.app`
 
 ### Issue: "Invalid wallet address" error
 
@@ -347,7 +381,7 @@ This happens when an older package version is missing a Node shebang in the CLI 
 
 | Environment Variable | Default | Description |
 |---|---|---|
-| `SOLCLAIMER_API_URL` | `http://localhost:3000` | SOL Claimer API base URL |
+| `SOLCLAIMER_API_URL` | `https://api.solclaimer.app` | SOL Claimer API base URL |
 
 ### Example: Using a Remote API
 
@@ -360,7 +394,7 @@ Update your Claude config:
       "command": "node",
       "args": ["/Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js"],
       "env": {
-        "SOLCLAIMER_API_URL": "https://api.example.com/solclaimer"
+        "SOLCLAIMER_API_URL": "https://api.solclaimer.app"
       }
     }
   }
@@ -375,7 +409,7 @@ If you need custom behavior, create a wrapper script:
 
 ```bash
 #!/bin/bash
-export SOLCLAIMER_API_URL=${SOLCLAIMER_API_URL:-http://localhost:3000}
+export SOLCLAIMER_API_URL=${SOLCLAIMER_API_URL:-https://api.solclaimer.app}
 export NODE_OPTIONS="--enable-source-maps"
 node /Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js
 ```

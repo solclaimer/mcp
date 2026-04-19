@@ -9,10 +9,11 @@ A Model Context Protocol (MCP) server that provides seamless integration between
 
 ## Features
 
-- ✅ **Three Powerful Tools**:
+- ✅ **Four Powerful Tools**:
   1. **analyze_empty_accounts** - Find and recover rent from empty token accounts
   2. **analyze_burnable_accounts** - Identify low-value tokens (<$1) to burn and close
-  3. **get_how_it_works** - Learn about SOL Claimer functionality
+  3. **analyze_swappable_accounts** - Find tokens with amount > 0 that can be swapped and closed
+  4. **get_how_it_works** - Learn about SOL Claimer functionality
 
 ## SOL Claimer Features (Page Copy)
 
@@ -37,8 +38,8 @@ On Solana, token accounts hold a rent-exempt SOL reserve. When an account is no 
 
 - Node.js 18+ (tested on v20+)
 - npm 10+
-- SOL Claimer API running locally or accessible via network
-- Environment variable `SOLCLAIMER_API_URL` (optional, defaults to http://localhost:3000)
+- SOL Claimer API accessible at `https://api.solclaimer.app`
+- Environment variable `SOLCLAIMER_API_URL` (optional, defaults to `https://api.solclaimer.app`)
 
 ## Installation
 
@@ -76,10 +77,10 @@ npm start
 Optionally set the SOL Claimer API URL:
 
 ```bash
-export SOLCLAIMER_API_URL=http://localhost:3000
+export SOLCLAIMER_API_URL=https://api.solclaimer.app
 ```
 
-If not set, defaults to `http://localhost:3000`.
+If not set, defaults to `https://api.solclaimer.app`.
 
 ## Development
 
@@ -128,7 +129,22 @@ Analyzes a wallet for token accounts with balances worth less than $1 USD that c
   - Rent (in lamports)
   - Contract verification status
 
-### 3. get_how_it_works
+### 3. analyze_swappable_accounts
+
+Analyzes a wallet for token accounts with amount > 0 that can be swapped and then closed.
+
+**Parameters:**
+
+- `wallet_address` (string, required): The Solana wallet address to analyze
+
+**Response:**
+
+- `accountsToSwap` - Number of swappable accounts found
+- `totalSol` - Total SOL available for recovery after swap and close
+- `totalUsdValue` - Combined USD value of all swappable tokens
+- `accountDetails` - Array of detailed account information including token name and symbol
+
+### 4. get_how_it_works
 
 Returns documentation about SOL Claimer features and capabilities.
 
@@ -145,7 +161,7 @@ Returns documentation about SOL Claimer features and capabilities.
 ```
 User: "Can you analyze my Solana wallet at 7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri?"
 
-Claude: [Uses analyze_empty_accounts and analyze_burnable_accounts tools]
+Claude: [Uses analyze_empty_accounts, analyze_burnable_accounts, and analyze_swappable_accounts tools]
 "Based on the analysis, I found:
 - 5 empty token accounts: 0.0101964 SOL can be recovered
 - 12 burnable accounts: 0.0244713 SOL can be recovered (worth $0.52)
@@ -177,7 +193,7 @@ Any MCP-compatible client can connect to this server using:
       "command": "node",
       "args": ["/path/to/dist/index.js"],
       "env": {
-        "SOLCLAIMER_API_URL": "http://localhost:3000"
+        "SOLCLAIMER_API_URL": "https://api.solclaimer.app"
       }
     }
   }
@@ -198,15 +214,15 @@ package.json          # Dependencies and scripts
 ### Key Components
 
 1. **SolClaimerApiClient** - Handles communication with the SOL Claimer API
-2. **MCP Server** - Exposes three tools via the Model Context Protocol
+2. **MCP Server** - Exposes four tools via the Model Context Protocol
 3. **Response Formatters** - Transform API responses into readable text
 
 ## Troubleshooting
 
 ### Connection refused error
 
-- Ensure SOL Claimer API is running on the configured `SOLCLAIMER_API_URL`
-- Default: http://localhost:3000
+- Ensure SOL Claimer API is reachable at the configured `SOLCLAIMER_API_URL`
+- Default: https://api.solclaimer.app
 - Check firewall and port accessibility
 
 ### Invalid wallet address

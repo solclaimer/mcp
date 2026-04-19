@@ -48,7 +48,7 @@ This is a complete MCP (Model Context Protocol) server for the SOL Claimer API.
          "command": "node",
          "args": ["/Users/zouhairet-taousy/dev/solclaimer-mcp/dist/index.js"],
          "env": {
-           "SOLCLAIMER_API_URL": "http://localhost:3000"
+           "SOLCLAIMER_API_URL": "https://api.solclaimer.app"
          }
        }
      }
@@ -70,7 +70,7 @@ Contact your AI platform provider for MCP server integration options. Generally:
 
 1. Point to the compiled `dist/index.js` file
 2. Configure the `SOLCLAIMER_API_URL` environment variable
-3. The server will expose three tools available to the AI model
+3. The server will expose four tools available to the AI model
 
 ## Architecture Reference
 
@@ -81,7 +81,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed design documentation.
 **Problem:** MCP server not connecting
 - Check that `dist/index.js` exists: `ls -la dist/`
 - Verify Node.js version: `node --version` (should be 18+)
-- Check API is running: `curl http://localhost:3000/api/v1/info/how-it-works`
+- Check API is running: `curl https://api.solclaimer.app/api/v1/info/how-it-works`
 
 **Problem:** Tools not showing up in Claude
 - Restart Claude Desktop completely
@@ -90,7 +90,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed design documentation.
 
 **Problem:** API connection timeout
 - Ensure SOL Claimer API is on port 3000
-- Try: `curl http://localhost:3000/api/v1/info/how-it-works`
+- Try: `curl https://api.solclaimer.app/api/v1/info/how-it-works`
 - If running on different host/port, update `SOLCLAIMER_API_URL`
 
 ## Documentation

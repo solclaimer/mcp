@@ -18,17 +18,11 @@ ChatGPT Pro users can create GPTs with custom actions that call the SOL Claimer 
 
 ### Step 1: Prepare Your API
 
-First, ensure the SOL Claimer API is publicly accessible (or use ngrok for local development):
+First, ensure the SOL Claimer API is publicly accessible (for production use):
 
+Set the environment variable:
 ```bash
-# If running locally, expose it via ngrok
-ngrok http 3000
-# This gives you a public URL like: https://abc123.ngrok.io
-```
-
-Update the environment variable:
-```bash
-export SOLCLAIMER_API_URL=https://abc123.ngrok.io
+export SOLCLAIMER_API_URL=https://api.solclaimer.app
 ```
 
 ### Step 2: Create OpenAPI Schema
@@ -42,8 +36,8 @@ info:
   description: Analyze Solana token accounts and recover rent
   version: 1.0.0
 servers:
-  - url: http://localhost:3000
-    description: Local development
+  - url: https://api.solclaimer.app
+    description: Production API
 
 paths:
   /api/v1/accounts/analyze-empty:
@@ -135,6 +129,58 @@ paths:
                   timestamp:
                     type: string
 
+  /api/v1/accounts/analyze-swappable:
+    post:
+      summary: Analyze swappable token accounts
+      description: Find token accounts with amount > 0 that can be swapped and then closed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                walletAddress:
+                  type: string
+                  description: The Solana wallet address to analyze
+                  example: "7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri"
+              required:
+                - walletAddress
+      responses:
+        "200":
+          description: Successful analysis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      accountsToSwap:
+                        type: integer
+                      totalSol:
+                        type: number
+                      totalUsdValue:
+                        type: number
+                      accountDetails:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            pubkey:
+                              type: string
+                            tokenName:
+                              type: string
+                            tokenSymbol:
+                              type: string
+                            usdValue:
+                              type: number
+                  timestamp:
+                    type: string
+
   /api/v1/info/how-it-works:
     get:
       summary: Get SOL Claimer information
@@ -175,7 +221,8 @@ paths:
    You are a helpful assistant for the SOL Claimer tool. Help users analyze their Solana wallets to:
    1. Identify empty token accounts that can be closed to recover rent
    2. Find low-value tokens (<$1 USD) that can be burned to free up account space
-   3. Understand how much SOL can be recovered from these accounts
+   3. Find token balances that can be swapped and then closed
+   4. Understand how much SOL can be recovered from these accounts
    
    When users provide a wallet address, use the available tools to analyze it and provide clear recommendations.
    ```
@@ -253,6 +300,23 @@ def analyze_wallet_with_gpt(wallet_address):
                     "required": ["wallet_address"]
                 }
             }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "analyze_swappable_accounts",
+                "description": "Analyze a Solana wallet for token balances that can be swapped and closed",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "wallet_address": {
+                            "type": "string",
+                            "description": "The Solana wallet address"
+                        }
+                    },
+                    "required": ["wallet_address"]
+                }
+            }
         }
     ]
     
@@ -262,7 +326,7 @@ def analyze_wallet_with_gpt(wallet_address):
         messages=[
             {
                 "role": "user",
-                "content": f"Analyze the Solana wallet {wallet_address}. Check for empty accounts and burnable tokens."
+                "content": f"Analyze the Solana wallet {wallet_address}. Check for empty accounts, burnable tokens, and swappable token balances."
             }
         ],
         tools=tools,
@@ -275,12 +339,17 @@ def analyze_wallet_with_gpt(wallet_address):
         
         if tool_call.function.name == "analyze_empty_accounts":
             result = requests.post(
-                "http://localhost:3000/api/v1/accounts/analyze-empty",
+                "https://api.solclaimer.app/api/v1/accounts/analyze-empty",
                 json={"walletAddress": wallet_address}
             ).json()
         elif tool_call.function.name == "analyze_burnable_accounts":
             result = requests.post(
-                "http://localhost:3000/api/v1/accounts/analyze-burnable",
+                "https://api.solclaimer.app/api/v1/accounts/analyze-burnable",
+                json={"walletAddress": wallet_address}
+            ).json()
+        elif tool_call.function.name == "analyze_swappable_accounts":
+            result = requests.post(
+                "https://api.solclaimer.app/api/v1/accounts/analyze-swappable",
                 json={"walletAddress": wallet_address}
             ).json()
         
@@ -352,12 +421,30 @@ async function analyzeWalletWithGPT(walletAddress) {
         },
       },
     },
+    {
+      type: "function",
+      function: {
+        name: "analyze_swappable_accounts",
+        description:
+          "Analyze a Solana wallet for token balances that can be swapped and closed",
+        parameters: {
+          type: "object",
+          properties: {
+            wallet_address: {
+              type: "string",
+              description: "The Solana wallet address",
+            },
+          },
+          required: ["wallet_address"],
+        },
+      },
+    },
   ];
 
   let messages = [
     {
       role: "user",
-      content: `Analyze the Solana wallet ${walletAddress}. Check for empty accounts and burnable tokens.`,
+      content: `Analyze the Solana wallet ${walletAddress}. Check for empty accounts, burnable tokens, and swappable token balances.`,
     },
   ];
 
@@ -375,13 +462,19 @@ async function analyzeWalletWithGPT(walletAddress) {
     let result;
     if (toolCall.function.name === "analyze_empty_accounts") {
       const res = await axios.post(
-        "http://localhost:3000/api/v1/accounts/analyze-empty",
+        "https://api.solclaimer.app/api/v1/accounts/analyze-empty",
         { walletAddress }
       );
       result = JSON.stringify(res.data);
     } else if (toolCall.function.name === "analyze_burnable_accounts") {
       const res = await axios.post(
-        "http://localhost:3000/api/v1/accounts/analyze-burnable",
+        "https://api.solclaimer.app/api/v1/accounts/analyze-burnable",
+        { walletAddress }
+      );
+      result = JSON.stringify(res.data);
+    } else if (toolCall.function.name === "analyze_swappable_accounts") {
+      const res = await axios.post(
+        "https://api.solclaimer.app/api/v1/accounts/analyze-swappable",
         { walletAddress }
       );
       result = JSON.stringify(res.data);
@@ -428,7 +521,7 @@ openai.api_key = "your-api-key"
 # Create assistant
 assistant = openai.Assistant.create(
     name="SOL Claimer Analyzer",
-    description="Analyzes Solana wallets for empty accounts and low-value tokens",
+    description="Analyzes Solana wallets for empty accounts, low-value tokens, and swappable token balances",
     model="gpt-4-turbo",
     tools=[
         {
@@ -450,6 +543,20 @@ assistant = openai.Assistant.create(
             "function": {
                 "name": "analyze_burnable_accounts",
                 "description": "Analyze burnable token accounts",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "wallet_address": {"type": "string"}
+                    },
+                    "required": ["wallet_address"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "analyze_swappable_accounts",
+                "description": "Analyze swappable token accounts",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -495,7 +602,7 @@ for msg in messages:
 
 ```bash
 # Test with curl
-curl -X POST http://localhost:3000/api/v1/accounts/analyze-empty \
+curl -X POST https://api.solclaimer.app/api/v1/accounts/analyze-empty \
   -H "Content-Type: application/json" \
   -d '{"walletAddress":"7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri"}'
 
@@ -534,13 +641,12 @@ If using custom actions in a GPT:
 **Solution:**
 1. Check the OpenAPI schema is valid: use an [OpenAPI validator](https://validator.swagger.io/)
 2. Verify the API endpoint is accessible from OpenAI's servers
-3. Check API logs for errors: `curl -v http://localhost:3000/api/v1/info/how-it-works`
+3. Check API logs for errors: `curl -v https://api.solclaimer.app/api/v1/info/how-it-works`
 
 ### Issue: "Connection timeout"
 
 **Solution:**
-- If using localhost, expose via ngrok: `ngrok http 3000`
-- Update the OpenAPI server URL to the ngrok URL
+- Ensure outbound access to `https://api.solclaimer.app` from your environment
 - Ensure firewall allows connections
 
 ### Issue: API response not parsed correctly
