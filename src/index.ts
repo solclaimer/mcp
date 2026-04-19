@@ -94,11 +94,7 @@ class SolClaimerApiClient {
       );
       return response.data;
     } catch (error) {
-      throw new Error(
-        `Failed to analyze empty accounts: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      throw new Error(`Failed to analyze empty accounts: ${this.formatApiError(error)}`);
     }
   }
 
@@ -110,11 +106,7 @@ class SolClaimerApiClient {
       );
       return response.data;
     } catch (error) {
-      throw new Error(
-        `Failed to analyze burnable accounts: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      throw new Error(`Failed to analyze burnable accounts: ${this.formatApiError(error)}`);
     }
   }
 
@@ -126,11 +118,7 @@ class SolClaimerApiClient {
       );
       return response.data;
     } catch (error) {
-      throw new Error(
-        `Failed to analyze swappable accounts: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
+      throw new Error(`Failed to analyze swappable accounts: ${this.formatApiError(error)}`);
     }
   }
 
@@ -139,10 +127,31 @@ class SolClaimerApiClient {
       const response = await this.apiClient.get<HowItWorksResponse>("/api/v1/info/how-it-works");
       return response.data;
     } catch (error) {
-      throw new Error(
-        `Failed to get how it works: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
+      throw new Error(`Failed to get how it works: ${this.formatApiError(error)}`);
     }
+  }
+
+  private formatApiError(error: unknown): string {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const apiMessage =
+        typeof error.response?.data === "object" &&
+        error.response?.data !== null &&
+        "error" in error.response.data &&
+        typeof (error.response.data as { error?: { message?: unknown } }).error?.message === "string"
+          ? (error.response.data as { error: { message: string } }).error.message
+          : null;
+
+      if (status && apiMessage) {
+        return `${status} - ${apiMessage}`;
+      }
+
+      if (status) {
+        return `status ${status}`;
+      }
+    }
+
+    return error instanceof Error ? error.message : "Unknown error";
   }
 }
 
