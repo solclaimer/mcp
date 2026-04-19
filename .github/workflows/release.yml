@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version bump type'
+        description: "Version bump type"
         required: true
         type: choice
         options:
@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,8 +31,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Configure Git
         run: |
@@ -71,10 +71,10 @@ jobs:
               VERSION_TYPE="patch"
             fi
           fi
-          
+
           echo "Bumping $VERSION_TYPE version..."
           npm version $VERSION_TYPE -m "chore: bump version to %s [skip ci]"
-          
+
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "New version: $NEW_VERSION"
@@ -93,15 +93,22 @@ jobs:
           release_name: Release v${{ steps.version.outputs.new_version }}
           body: |
             ## Changes in v${{ steps.version.outputs.new_version }}
-            
+
             See [CHANGELOG.md](CHANGELOG.md) for details.
-            
+
             ### Installation
             ```bash
             npm install @solclaimer/mcp@${{ steps.version.outputs.new_version }}
             ```
           draft: false
           prerelease: false
+
+      - name: Verify npm publish access
+        run: |
+          npm whoami
+          npm view @solclaimer/mcp version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         run: npm publish --provenance --access public
