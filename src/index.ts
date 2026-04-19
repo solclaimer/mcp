@@ -301,7 +301,20 @@ ${"=".repeat(data.data.title.length)}
 
 ${data.data.description}
 
-Features:
+SOL Claimer is a Solana SPL token manager built to help users clean up token accounts and recover locked rent fees.
+
+Core Features:
+- Claim Rent Fee: Close empty token accounts and reclaim SOL rent.
+- Create SPL / SPL22 Tokens: Launch standard SPL and Token-2022 assets.
+- Mint New Coins: Mint additional token supply when needed.
+- Bulk Send Tokens: Distribute tokens to multiple wallets in one operation.
+- Burn Scam / Worthless Coins: Remove unwanted low-value tokens and recover rent.
+- Swap Tiny Amounts and Get Rent Fee: Convert dust balances and close accounts to unlock SOL.
+
+How Rent Claiming Works:
+On Solana, token accounts hold rent-exempt SOL. When those accounts are no longer needed, closing them returns that SOL to your wallet. SOL Claimer helps identify eligible accounts, then guides users through burning or clearing balances and closing accounts to claim rent safely.
+
+Additional API-Defined Features:
 `;
 
   data.data.features.forEach((feature) => {

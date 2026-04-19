@@ -14,6 +14,21 @@ A Model Context Protocol (MCP) server that provides seamless integration between
   2. **analyze_burnable_accounts** - Identify low-value tokens (<$1) to burn and close
   3. **get_how_it_works** - Learn about SOL Claimer functionality
 
+## SOL Claimer Features (Page Copy)
+
+SOL Claimer is a Solana SPL token manager focused on cleaning token accounts and recovering locked rent.
+
+- **Claim Rent Fee** - Close empty token accounts and reclaim SOL rent back to your wallet.
+- **Create SPL / SPL22 Tokens** - Launch standard or Token-2022 assets.
+- **Mint New Coins** - Mint additional supply for your token when needed.
+- **Bulk Send Tokens** - Send tokens to many wallets in one flow.
+- **Burn Scam / Worthless Coins** - Remove unwanted low-value tokens and recover account rent.
+- **Swap Tiny Amounts and Get Rent Fee** - Convert dust balances and close token accounts to unlock SOL.
+
+### How rent claiming works
+
+On Solana, token accounts hold a rent-exempt SOL reserve. When an account is no longer needed, closing it returns that SOL to your wallet. SOL Claimer helps you find eligible accounts (empty or low-value), then guides you to burn/clear balances and close accounts so you can recover the rent safely.
+
 - 🔄 **Real-time API Integration** - Direct connection to SOL Claimer API
 - 🛡️ **Error Handling** - Graceful error management and user-friendly messages
 - 📊 **Rich Response Formatting** - Detailed, readable analysis results
@@ -86,9 +101,11 @@ npm run lint
 Analyzes a Solana wallet for empty token accounts that can be closed to recover rent.
 
 **Parameters:**
+
 - `wallet_address` (string, required): The Solana wallet address to analyze
 
 **Response:**
+
 - `accountsToClose` - Number of empty accounts found
 - `totalSol` - Total SOL available for recovery
 
@@ -97,9 +114,11 @@ Analyzes a Solana wallet for empty token accounts that can be closed to recover 
 Analyzes a wallet for token accounts with balances worth less than $1 USD that can be burned and closed.
 
 **Parameters:**
+
 - `wallet_address` (string, required): The Solana wallet address to analyze
 
 **Response:**
+
 - `accountsToBurn` - Number of burnable accounts found
 - `totalSol` - Total SOL available for recovery
 - `totalUsdValue` - Combined USD value of all burnable tokens
@@ -116,6 +135,7 @@ Returns documentation about SOL Claimer features and capabilities.
 **Parameters:** None
 
 **Response:**
+
 - Information about SOL Claimer features
 - Description of how it works
 - Website link
@@ -184,15 +204,18 @@ package.json          # Dependencies and scripts
 ## Troubleshooting
 
 ### Connection refused error
+
 - Ensure SOL Claimer API is running on the configured `SOLCLAIMER_API_URL`
 - Default: http://localhost:3000
 - Check firewall and port accessibility
 
 ### Invalid wallet address
+
 - Verify the Solana wallet address format (44-character base58 string)
 - Examples: `7cvkjYAkUYs4W8XcXsca7cBrEGFeSUjeZmKoNBvEwyri`
 
 ### API timeout
+
 - Check network connectivity to the SOL Claimer API
 - Increase timeout if API is slow (edit timeout in SolClaimerApiClient)
 - Check if Solana RPC endpoint is accessible
