@@ -336,6 +336,31 @@ function formatTokenLabel(account: AccountDetail): string {
   return `${tokenName} (${tokenSymbol})`;
 }
 
+function formatUsd(value: number | undefined): string {
+  const safeValue = Number.isFinite(value) ? (value as number) : 0;
+
+  if (safeValue === 0) {
+    return "$0";
+  }
+
+  if (safeValue < 0.000001) {
+    return "<$0.000001";
+  }
+
+  return `$${safeValue.toFixed(6)}`;
+}
+
+function formatTokenAmount(account: AccountDetail): string {
+  const parsedRawAmount = Number(account.amount);
+  const computedUiAmount =
+    Number.isFinite(parsedRawAmount) && account.decimals >= 0
+      ? parsedRawAmount / 10 ** account.decimals
+      : 0;
+  const uiAmount = account.uiAmount ?? computedUiAmount;
+
+  return `${uiAmount} (${account.amount} smallest units)`;
+}
+
 function formatBurnableAccountsResponse(data: BurnableAccountsAnalysis): string {
   if (!data.success) {
     return "Failed to analyze burnable accounts";
@@ -346,17 +371,21 @@ Burnable Token Accounts Analysis
 =================================
 Total Accounts to Burn: ${data.data.accountsToBurn}
 Total SOL to Recover: ${data.data.totalSol} SOL
-Total USD Value: $${data.data.totalUsdValue.toFixed(2)}
+Total USD Value: ${formatUsd(data.data.totalUsdValue)}
 
 Accounts Details:
 `;
+
+  if (data.data.accountDetails.length === 0) {
+    response += "No burnable token accounts found.\n";
+  }
 
   data.data.accountDetails.forEach((account, index) => {
     response += `
 ${index + 1}. ${formatTokenLabel(account)}
    Mint: ${account.mint}
-   Amount: ${account.uiAmount} (${account.amount} smallest units)
-   USD Value: $${account.usdValue.toFixed(2)}
+   Amount: ${formatTokenAmount(account)}
+   USD Value: ${formatUsd(account.usdValue)}
    Lamports (rent): ${account.lamports}
    Verified Contract: ${account.isVerifiedContract ? "Yes" : "No"}
 `;
@@ -379,17 +408,21 @@ Swappable Token Accounts Analysis
 =================================
 Total Accounts to Swap: ${data.data.accountsToSwap}
 Total SOL to Recover (after swap and close): ${data.data.totalSol} SOL
-Total USD Value: $${data.data.totalUsdValue.toFixed(2)}
+Total USD Value: ${formatUsd(data.data.totalUsdValue)}
 
 Accounts Details:
 `;
+
+  if (data.data.accountDetails.length === 0) {
+    response += "No swappable token accounts found with amount > 0.\n";
+  }
 
   data.data.accountDetails.forEach((account, index) => {
     response += `
 ${index + 1}. ${formatTokenLabel(account)}
    Mint: ${account.mint}
-   Amount: ${account.uiAmount} (${account.amount} smallest units)
-   USD Value: $${account.usdValue.toFixed(2)}
+   Amount: ${formatTokenAmount(account)}
+   USD Value: ${formatUsd(account.usdValue)}
    Lamports (rent): ${account.lamports}
    Verified Contract: ${account.isVerifiedContract ? "Yes" : "No"}
 `;
